@@ -1,6 +1,6 @@
-"# python" 
+#如何使用
+##一、HTMLTestRunnerEN 使用
 
-一、HTMLTestRunnerEN 使用
 有时大伙会觉得英语会有莫名的逼格（感叹,沉默），所以保留了英文显示，满足大家的需要，报告内容支持中文显示。
 ```python
 import HTMLTestRunnerEN
