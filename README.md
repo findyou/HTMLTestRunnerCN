@@ -1,4 +1,4 @@
-[#说明]
+[说明]
 =========================
 HTMLTestRunner（python2.7）输出的报告真的很丑,于是找了一圈没有我自已想要的html，所以自己动手进行了美化<br>
 原作者文件下载地址：http://tungwaiyip.info/software/HTMLTestRunner.html<br>
@@ -14,9 +14,9 @@ Version 0.8.2.1 -Findyou
 * 修改“详细”逻辑，增加与“收起”效果变换
 * 右侧底部增加 返回 顶部的锚点
 ```
-[#如何使用]
+[如何使用]
 =========================
-##一、HTMLTestRunnerEN 使用
+一、HTMLTestRunnerEN 使用
 --------------------------
 有时大伙会觉得英语会有莫名的逼格（感叹,沉默），所以保留了英文显示，满足大家的需要，报告内容支持中文显示。
 <br>
@@ -45,7 +45,7 @@ python test_HTMLTestRunnerEN.py
 * 执行结果：Report.html
 ![](https://github.com/findyou/python/blob/master/Report_EN.gif "测试结果") 
 
-##二、HTMLTestRunnerCN 使用
+二、HTMLTestRunnerCN 使用
 --------------------------
 使用同HTMLTestRunnerEN，无区别<br>
 * 执行结果：Report.html
