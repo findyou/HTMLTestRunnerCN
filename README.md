@@ -64,12 +64,12 @@ python test_HTMLTestRunnerEN.py
 ![](https://github.com/findyou/python/blob/master/Report_CN.gif "测试结果") 
 
 
-四、HTMLTestReportCN（python3.x） 使用
+三、HTMLTestReportCN（python3.x） 使用
 --------------------------
 使用同HTMLTestRunnerEN，无区别<br>
 <br>
 
-五、HTMLTestReportEN（python3.x） 使用
+四、HTMLTestReportEN（python3.x） 使用
 --------------------------
 使用同HTMLTestRunnerEN，无区别<br>
  <br>
