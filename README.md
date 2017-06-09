@@ -5,12 +5,12 @@ HTMLTestRunner（python2.7）输出的报告真的很丑,于是找了一圈没�
 我基于其Version 0.8.2进行了修改美化具体内容如下：<br>
 ```python
 Version 20170609   -Findyou
-* python3x --仅支持python3x
+* python3x  #仅支持python3x
    # Version 0.8.2.2
    # HTMLTestReportCN.py  中文报告
    # HTMLTestReportEN.py  英文报告
    
-* python2x --仅支持python2x
+* python2x  #仅支持python2x
    # Version 0.8.2.1
    # HTMLTestRunnerEN.py  中文报告
    # HTMLTestRunnerCN.py  英文报告
@@ -28,7 +28,7 @@ Version 0.8.2.1 -Findyou
 ```
 [如何使用]
 =========================
-一、HTMLTestRunnerEN（python2.7） 使用
+一、HTMLTestRunnerEN（python2.x） 使用
 --------------------------
 有时大伙会觉得英语会有莫名的逼格（感叹,沉默），所以保留了英文显示，满足大家的需要，报告内容支持中文显示。
 <br>
@@ -57,8 +57,19 @@ python test_HTMLTestRunnerEN.py
 * 执行结果：Report.html
 ![](https://github.com/findyou/python/blob/master/Report_EN.gif "测试结果") 
 
-二、HTMLTestRunnerCN（python2.7） 使用
+二、HTMLTestRunnerCN（python2.x） 使用
 --------------------------
 使用同HTMLTestRunnerEN，无区别<br>
 * 执行结果：Report.html
 ![](https://github.com/findyou/python/blob/master/Report_CN.gif "测试结果") 
+
+
+四、HTMLTestReportCN（python3.x） 使用
+--------------------------
+使用同HTMLTestRunnerEN，无区别<br>
+<br>
+
+五、HTMLTestReportEN（python3.x） 使用
+--------------------------
+使用同HTMLTestRunnerEN，无区别<br>
+ <br>
