@@ -1,6 +1,6 @@
 [说明]
 =========================
-HTMLTestRunner（python2.7）输出的报告真的很丑,于是找了一圈没有我自已想要的html，所以自己动手进行了美化<br>
+HTMLTestRunner输出的报告真的很丑,于是找了一圈没有我自已想要的html，所以自己动手进行了美化<br>
 原作者文件下载地址：http://tungwaiyip.info/software/HTMLTestRunner.html<br>
 我基于其Version 0.8.2进行了修改美化具体内容如下：<br>
 ```python
