@@ -473,7 +473,7 @@ class _TestResult(TestResult):
 
 
     def startTest(self, test):
-	stream = sys.stderr
+        stream = sys.stderr
         stdout_content = " Testing: " + str(test)
         stream.write(stdout_content)
         stream.flush()
