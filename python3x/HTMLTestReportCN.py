@@ -412,7 +412,7 @@ table       { font-size: 100%; }
     <!-- 默认展开错误信息 -Findyou -->
     <button id='btn_%(tid)s' type="button"  class="btn btn-danger btn-xs" data-toggle="collapse" data-target='#div_%(tid)s'>%(status)s</button>
     <div id='div_%(tid)s' class="collapse in">
-    <pre>
+    <pre style="text-align:left">
     %(script)s
     </pre>
     </div>
@@ -473,6 +473,10 @@ class _TestResult(TestResult):
 
 
     def startTest(self, test):
+	stream = sys.stderr
+        stdout_content = " Testing: " + str(test)
+        stream.write(stdout_content)
+        stream.flush()
         TestResult.startTest(self, test)
         # just one buffer for both stdout and stderr
         self.outputBuffer = io.StringIO()
