@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 
 import unittest
-import HTMLTestReportEN
+import HTMLTestRunnerCN
 
 
 
@@ -14,22 +14,25 @@ class MyTestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
-
     def testCase1(self):
-        self.assertEqual(2,2,"testError")
-
+        self.assertEqual(2,2,"testCase_Pass")
 
     def testCase2(self):
-        self.assertEqual(2,3,"testError")
+        self.assertEqual(2,3,"testCase_Fail")
 
     def testCase3(self):
-        self.assertEqual(2,5,"测试错误")
+        self.assertEqual(2,5,"测试用例_不通过")
 
     def testCase4(self):
-        self.assertEqual(2,1,"测试错误")
+        self.assertEqual(2,2,"testCase_Error")
+        testCase_Error
 
     def testCase5(self):
         pass
+
+    def testCase6(self):
+        self.assertEqual(2,2,"testCase_Error")
+        Findyou
 
 class APITestCase(unittest.TestCase):
     def setUp(self):
@@ -39,19 +42,21 @@ class APITestCase(unittest.TestCase):
         pass
 
     def testCase1(self):
-        self.assertEqual(2, 2, "testError")
+        self.assertEqual(2, 2, "testCase_Pass")
+        print("测试打印日志～")
 
     def testCase2(self):
-        self.assertEqual(3, 3, "testError")
+        self.assertEqual(3, 3, "testCase_Pass")
+        print("测试打印日志～")
 
     def testCase3(self):
-        self.assertEqual(5, 5, "testError")
+        self.assertEqual(5, 5, "testCase_Pass")
 
     def testCase4(self):
-        self.assertEqual(2, 1, "测试错误")
+        self.assertEqual(2, 1, "测试用例_不通过")
 
     def testCase5(self):
-        self.assertEqual(2, 6, "testError")
+        self.assertEqual(2, 9, "测试用例_不通过")
 
     def testCase6(self):
         pass
@@ -66,6 +71,7 @@ def Suite():
     suiteTest.addTest(MyTestCase("testCase3"))
     suiteTest.addTest(MyTestCase("testCase4"))
     suiteTest.addTest(MyTestCase("testCase5"))
+    suiteTest.addTest(MyTestCase("testCase6"))
     suiteTest.addTest(APITestCase("testCase1"))
     suiteTest.addTest(APITestCase("testCase2"))
     suiteTest.addTest(APITestCase("testCase3"))
@@ -74,24 +80,15 @@ def Suite():
     suiteTest.addTest(APITestCase("testCase6"))
     return suiteTest
 
-'''
-问题：代码写的没问题，执行也成功了，但就是无法生成HTMLTestRunner的报告
-其实这是编辑器搞得鬼，编辑器为了方便用户执行测试，都有一项功能，可以用编辑器来调用unittest或者nose来执行测试用例，这种情况下，执行的只是用例或者套件，而不是整个文件，写在main里的代码是不会被执行的！！自然无法生成测试报告
-我们在如果想要生成测试报告，那么一定要注意右键执行时选择的右键菜单，一定要当做文件执行，不要让编辑器当做用例执行
-if __name__ == ‘__main__‘:
-if __name__ == ‘python‘:
-# 把main修改成自己的文件夹名就可以了
 
----试了不行
-'''
 if __name__ == '__main__':
     #确定生成报告的路径
-    filePath ='F:\\HTMLTestReportEN.html'
+    filePath ='/Users/albert/PycharmProjects/HTMLTestRunnerCN/ReportCN.html'
     fp = open(filePath,'wb')
     #生成报告的Title,描述
-    runner = HTMLTestReportEN.HTMLTestRunner(
+    runner = HTMLTestRunnerCN.HTMLTestReportCN(
         stream=fp,
-        title='{ Test Report }',
+        title='自动化测试报告',
         #description='详细测试用例结果',
         tester='Findyou'
         )
