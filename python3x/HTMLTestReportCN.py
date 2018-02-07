@@ -107,6 +107,7 @@ import time
 import unittest
 from xml.sax import saxutils
 import sys
+import re
 
 # ------------------------------------------------------------------------
 # The redirectors below are used to capture output during testing. Output
@@ -213,6 +214,7 @@ output_list = Array();
 1:Failed  //pt hiddenRow, ft none
 2:Pass    //pt none, ft hiddenRow
 3:All     //pt none, ft none
+4:Error   //pt diddenRow, et none
 */
 function showCase(level) {
     trs = document.getElementsByTagName("tr");
@@ -220,7 +222,7 @@ function showCase(level) {
         tr = trs[i];
         id = tr.id;
         if (id.substr(0,2) == 'ft') {
-            if (level == 2 || level == 0 ) {
+            if (level == 2 || level == 0 || level ==4) {
                 tr.className = 'hiddenRow';
             }
             else {
@@ -228,7 +230,15 @@ function showCase(level) {
             }
         }
         if (id.substr(0,2) == 'pt') {
-            if (level < 2) {
+            if (level == 1 || level == 0 || level == 4) {
+                tr.className = 'hiddenRow';
+            }
+            else {
+                tr.className = '';
+            }
+        }
+        if (id.substr(0,2) == 'et') {
+            if (level < 4) {
                 tr.className = 'hiddenRow';
             }
             else {
@@ -263,6 +273,10 @@ function showClassDetail(cid, count) {
         if (!tr) {
             tid = 'p' + tid0;
             tr = document.getElementById(tid);
+            if (!tr) {
+                tid = 'e' + tid0;
+                tr = document.getElementById(tid);
+            }
         }
         id_list[i] = tid;
         if (tr.className) {
@@ -358,7 +372,7 @@ table       { font-size: 100%; }
 <a class="btn btn-primary" href='javascript:showCase(0)'>概要{ %(passrate)s }</a>
 <a class="btn btn-success" href='javascript:showCase(2)'>通过{ %(Pass)s }</a>
 <a class="btn btn-warning" href='javascript:showCase(1)'>失败{ %(fail)s }</a>
-<a class="btn btn-danger" href='javascript:showCase(2)'>错误{ %(error)s }</a>
+<a class="btn btn-danger" href='javascript:showCase(4)'>错误{ %(error)s }</a>
 <a class="btn btn-info" href='javascript:showCase(3)'>所有{ %(count)s }</a>
 </p>
 <table id='result_table' class="table table-condensed table-bordered table-hover">
@@ -626,11 +640,28 @@ class HTMLTestRunner(Template_mixin):
                 self.passrate = "0.00 %"
         else:
             status = 'none'
+        # 失败模块列表统计逻辑start
+        # 为了发邮件的时候确定知道哪个模块失败了，这里在报告的头里面单独添加一行失败模块的列表
+        # 把用例结果和对应的模块名称单独提取到一个list
+        module_result_list = [(status, re.split(" |\(|\.", str(name))[2]) for status, name, _, _, _ in result.result]
+        failed_report_module_list = []  # 初始化模块失败列表
+        for module_result in module_result_list:
+            if module_result[0] != 0:  # 如果结果是失败的，则把模块名字放到失败模块列表
+                failed_report_module_list.append(module_result[1])
+        failed_report_module_list = list(set(failed_report_module_list))  # 去重
+        if len(failed_report_module_list) == 0:  # 如果没有失败的模块，失败模块日志为固定描述，否则用“，”连接
+            failed_string = "无失败模块"
+        elif len(failed_report_module_list) == 1:
+            failed_string = "".join(failed_report_module_list)
+        else:
+            failed_string = ",".join(failed_report_module_list)
+        # 失败模块列表统计逻辑end
         return [
             ('测试人员', self.tester),
             ('开始时间',startTime),
             ('合计耗时',duration),
             ('测试结果',status + "，通过率 = "+self.passrate),
+            ('失败的模块', failed_string)
         ]
 
     def generateReport(self, test, result):
@@ -683,7 +714,7 @@ class HTMLTestRunner(Template_mixin):
             for n,t,o,e,s in cls_results:
                 if n == 0: np += 1
                 elif n == 1: nf += 1
-                else: ne += 1
+                elif n == 2: ne += 1
                 ns += s  # 把单个class用例文件里面的多个def用例每次的耗时相加
             ns = round(ns, 2)
             sum_ns += ns  # 把所有用例的每次耗时相加
@@ -723,10 +754,16 @@ class HTMLTestRunner(Template_mixin):
 
 
     def _generate_report_test(self, rows, cid, tid, n, t, o, e):
-        # e.g. 'pt1.1', 'ft1.1', etc
+        # e.g. 'pt1_1', 'ft1_1', 'et1_1'etc
         has_output = bool(o or e)
         # ID修改点为下划线,支持Bootstrap折叠展开特效 - Findyou
-        tid = (n == 0 and 'p' or 'f') + 't%s_%s' % (cid+1,tid+1)
+        if n == 0:
+            tid_flag = 'p'
+        elif n == 1:
+            tid_flag = 'f'
+        elif n == 2:
+            tid_flag = 'e'
+        tid = tid_flag + 't%s_%s' % (cid+1, tid+1)
         name = t.id().split('.')[-1]
         doc = t.shortDescription() or ""
         desc = doc and ('%s: %s' % (name, doc)) or name
