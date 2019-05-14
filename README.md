@@ -61,10 +61,10 @@ python test_HTMLTestRunnerEN.py
 ```
 
 * 执行结果：Report.html
-![](https://github.com/findyou/python/blob/dev/Report_EN.gif "测试结果")
+![](https://github.com/findyou/HTMLTestRunnerCN/blob/dev/Report_EN.gif "测试结果")
 
 二、HTMLTestRunnerCN  使用
 --------------------------
 使用同HTMLTestRunnerEN，无区别<br>
 * 执行结果：Report.html
-![](https://github.com/findyou/python/blob/dev/Report_CN.gif "测试结果")
+![](https://github.com/findyou/HTMLTestRunnerCN/blob/dev/Report_CN.gif "测试结果")
