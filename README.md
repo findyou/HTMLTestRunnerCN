@@ -67,4 +67,4 @@ python test_HTMLTestRunnerEN.py
 --------------------------
 使用同HTMLTestRunnerEN，无区别<br>
 * 执行结果：Report.html
-![](https://github.com/findyou/HTMLTestRunnerCN/blob/dev/Report_CN.gif?raw=true)
+![](https://github.com/findyou/HTMLTestRunnerCN/blob/master/Report_CN.gif?raw=true)
