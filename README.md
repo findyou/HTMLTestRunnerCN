@@ -1,3 +1,14 @@
+[最新版本]
+https://github.com/findyou/HTMLTestRunnerCN/tree/dev
+
+```python
+* Version 0.8.3 20171206  -Findyou
+   # BUG fixed :错误的测试用例没有统计与显示
+   # BUG fixed :当PASS的测试用例有print内容时，通过按钮显示为红色
+   # 表格背景颜色根据用例结果显示颜色，优先级： 错误(黄色)>失败(红色)>通过(绿色)
+   # 合并文为HTMLTestRunner*N.py 同时支持python2,python3
+```
+
 [说明]
 =========================
 HTMLTestRunner输出的报告真的很丑,于是找了一圈没有我自已想要的html，所以自己动手进行了美化<br>
@@ -55,13 +66,13 @@ python test_HTMLTestRunnerEN.py
 ```
 
 * 执行结果：Report.html
-![](https://github.com/findyou/python/blob/master/Report_EN.gif "测试结果") 
+![1](https://github.com/findyou/HTMLTestRunnerCN/blob/master/Report_EN.gif?raw=true) 
 
 二、HTMLTestRunnerCN（python2.x） 使用
 --------------------------
 使用同HTMLTestRunnerEN，无区别<br>
 * 执行结果：Report.html
-![](https://github.com/findyou/python/blob/master/Report_CN.gif "测试结果") 
+![2](https://github.com/findyou/HTMLTestRunnerCN/blob/master/Report_CN.gif?raw=true) 
 
 
 三、HTMLTestReportCN（python3.x） 使用
