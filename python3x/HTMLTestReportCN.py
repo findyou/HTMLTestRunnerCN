@@ -107,6 +107,7 @@ import time
 import unittest
 from xml.sax import saxutils
 import sys
+import re
 
 # ------------------------------------------------------------------------
 # The redirectors below are used to capture output during testing. Output
@@ -185,9 +186,9 @@ class Template_mixin(object):
     2: '错误',
     }
 
-    DEFAULT_TITLE = '单元测试报告'
+    DEFAULT_TITLE = '测试报告'
     DEFAULT_DESCRIPTION = ''
-    DEFAULT_TESTER='最棒QA'
+    DEFAULT_TESTER='QA'
 
     # ------------------------------------------------------------------------
     # HTML Template
@@ -213,6 +214,7 @@ output_list = Array();
 1:Failed  //pt hiddenRow, ft none
 2:Pass    //pt none, ft hiddenRow
 3:All     //pt none, ft none
+4:Error   //pt diddenRow, et none
 */
 function showCase(level) {
     trs = document.getElementsByTagName("tr");
@@ -220,7 +222,7 @@ function showCase(level) {
         tr = trs[i];
         id = tr.id;
         if (id.substr(0,2) == 'ft') {
-            if (level == 2 || level == 0 ) {
+            if (level == 2 || level == 0 || level ==4) {
                 tr.className = 'hiddenRow';
             }
             else {
@@ -228,7 +230,15 @@ function showCase(level) {
             }
         }
         if (id.substr(0,2) == 'pt') {
-            if (level < 2) {
+            if (level == 1 || level == 0 || level == 4) {
+                tr.className = 'hiddenRow';
+            }
+            else {
+                tr.className = '';
+            }
+        }
+        if (id.substr(0,2) == 'et') {
+            if (level < 4) {
                 tr.className = 'hiddenRow';
             }
             else {
@@ -263,6 +273,10 @@ function showClassDetail(cid, count) {
         if (!tr) {
             tid = 'p' + tid0;
             tr = document.getElementById(tid);
+            if (!tr) {
+                tid = 'e' + tid0;
+                tr = document.getElementById(tid);
+            }
         }
         id_list[i] = tid;
         if (tr.className) {
@@ -356,8 +370,9 @@ table       { font-size: 100%; }
     REPORT_TMPL = """
 <p id='show_detail_line'>
 <a class="btn btn-primary" href='javascript:showCase(0)'>概要{ %(passrate)s }</a>
-<a class="btn btn-danger" href='javascript:showCase(1)'>失败{ %(fail)s }</a>
 <a class="btn btn-success" href='javascript:showCase(2)'>通过{ %(Pass)s }</a>
+<a class="btn btn-warning" href='javascript:showCase(1)'>失败{ %(fail)s }</a>
+<a class="btn btn-danger" href='javascript:showCase(4)'>错误{ %(error)s }</a>
 <a class="btn btn-info" href='javascript:showCase(3)'>所有{ %(count)s }</a>
 </p>
 <table id='result_table' class="table table-condensed table-bordered table-hover">
@@ -375,6 +390,7 @@ table       { font-size: 100%; }
     <td>通过</td>
     <td>失败</td>
     <td>错误</td>
+    <td>耗时</td>
     <td>详细</td>
 </tr>
 %(test_list)s
@@ -384,6 +400,7 @@ table       { font-size: 100%; }
     <td>%(Pass)s</td>
     <td>%(fail)s</td>
     <td>%(error)s</td>
+    <td>%(time_usage)s</td>
     <td>通过率：%(passrate)s</td>
 </tr>
 </table>
@@ -396,6 +413,7 @@ table       { font-size: 100%; }
     <td class="text-center">%(Pass)s</td>
     <td class="text-center">%(fail)s</td>
     <td class="text-center">%(error)s</td>
+    <td class="text-center">%(time_usage)s</td>
     <td class="text-center"><a href="javascript:showClassDetail('%(cid)s',%(count)s)" class="detail" id='%(cid)s'>详细</a></td>
 </tr>
 """ # variables: (style, desc, count, Pass, fail, error, cid)
@@ -412,7 +430,7 @@ table       { font-size: 100%; }
     <!-- 默认展开错误信息 -Findyou -->
     <button id='btn_%(tid)s' type="button"  class="btn btn-danger btn-xs" data-toggle="collapse" data-target='#div_%(tid)s'>%(status)s</button>
     <div id='div_%(tid)s' class="collapse in">
-    <pre>
+    <pre style="text-align:left">
     %(script)s
     </pre>
     </div>
@@ -473,6 +491,11 @@ class _TestResult(TestResult):
 
 
     def startTest(self, test):
+        stream = sys.stderr
+        # stdout_content = " Testing: " + str(test)
+        # stream.write(stdout_content)
+        # stream.flush()
+        # stream.write("\n")
         TestResult.startTest(self, test)
         # just one buffer for both stdout and stderr
         self.outputBuffer = io.StringIO()
@@ -482,13 +505,14 @@ class _TestResult(TestResult):
         self.stderr0 = sys.stderr
         sys.stdout = stdout_redirector
         sys.stderr = stderr_redirector
-
+        self.test_start_time = round(time.time(), 2)
 
     def complete_output(self):
         """
         Disconnect output redirection and return buffer.
         Safe to call multiple times.
         """
+        self.test_end_time = round(time.time(), 2)
         if self.stdout0:
             sys.stdout = self.stdout0
             sys.stderr = self.stderr0
@@ -508,45 +532,51 @@ class _TestResult(TestResult):
         self.success_count += 1
         TestResult.addSuccess(self, test)
         output = self.complete_output()
-        self.result.append((0, test, output, ''))
+        use_time = round(self.test_end_time - self.test_start_time, 2)
+        self.result.append((0, test, output, '', use_time))
         if self.verbosity > 1:
-            sys.stderr.write('ok ')
+            sys.stderr.write('  S ')
             sys.stderr.write(str(test))
             sys.stderr.write('\n')
         else:
-            sys.stderr.write('.')
+            sys.stderr.write('  S ')
+            sys.stderr.write('\n')
 
     def addError(self, test, err):
         self.error_count += 1
         TestResult.addError(self, test, err)
         _, _exc_str = self.errors[-1]
         output = self.complete_output()
-        self.result.append((2, test, output, _exc_str))
+        use_time = round(self.test_end_time - self.test_start_time, 2)
+        self.result.append((2, test, output, _exc_str, use_time))
         if self.verbosity > 1:
-            sys.stderr.write('E  ')
+            sys.stderr.write('  E  ')
             sys.stderr.write(str(test))
             sys.stderr.write('\n')
         else:
-            sys.stderr.write('E')
+            sys.stderr.write('  E  ')
+            sys.stderr.write('\n')
 
     def addFailure(self, test, err):
         self.failure_count += 1
         TestResult.addFailure(self, test, err)
         _, _exc_str = self.failures[-1]
         output = self.complete_output()
-        self.result.append((1, test, output, _exc_str))
+        use_time = round(self.test_end_time - self.test_start_time, 2)
+        self.result.append((1, test, output, _exc_str, use_time))
         if self.verbosity > 1:
-            sys.stderr.write('F  ')
+            sys.stderr.write('  F  ')
             sys.stderr.write(str(test))
             sys.stderr.write('\n')
         else:
-            sys.stderr.write('F')
+            sys.stderr.write('  F  ')
+            sys.stderr.write('\n')
 
 
 class HTMLTestRunner(Template_mixin):
     """
     """
-    def __init__(self, stream=sys.stdout, verbosity=1,title=None,description=None,tester=None):
+    def __init__(self, stream=sys.stdout, verbosity=2 ,title=None,description=None,tester=None):
         self.stream = stream
         self.verbosity = verbosity
         if title is None:
@@ -567,7 +597,7 @@ class HTMLTestRunner(Template_mixin):
 
     def run(self, test):
         "Run the given test case or test suite."
-        result = _TestResult(self.verbosity)
+        result = _TestResult(self.verbosity)  # verbosity为1,只输出成功与否，为2会输出用例名称
         test(result)
         self.stopTime = datetime.datetime.now()
         self.generateReport(test, result)
@@ -580,12 +610,12 @@ class HTMLTestRunner(Template_mixin):
         # Here at least we want to group them together by class.
         rmap = {}
         classes = []
-        for n,t,o,e in result_list:
+        for n,t,o,e,s in result_list:
             cls = t.__class__
             if cls not in rmap:
                 rmap[cls] = []
                 classes.append(cls)
-            rmap[cls].append((n,t,o,e))
+            rmap[cls].append((n,t,o,e,s))
         r = [(cls, rmap[cls]) for cls in classes]
         return r
 
@@ -604,16 +634,35 @@ class HTMLTestRunner(Template_mixin):
         if result.error_count:   status.append('错误 %s'   % result.error_count  )
         if status:
             status = '，'.join(status)
-            self.passrate = str("%.2f%%" % (float(result.success_count) / float(result.success_count + result.failure_count + result.error_count) * 100))
+            if (result.success_count + result.failure_count + result.error_count) > 0:
+                self.passrate = str("%.2f%%" % (float(result.success_count) / float(result.success_count + result.failure_count + result.error_count) * 100))
+            else:
+                self.passrate = "0.00 %"
         else:
             status = 'none'
+        # 失败模块列表统计逻辑start
+        # 为了发邮件的时候确定知道哪个模块失败了，这里在报告的头里面单独添加一行失败模块的列表
+        # 把用例结果和对应的模块名称单独提取到一个list
+        module_result_list = [(status, re.split(" |\(|\.", str(name))[2]) for status, name, _, _, _ in result.result]
+        failed_report_module_list = []  # 初始化模块失败列表
+        for module_result in module_result_list:
+            if module_result[0] != 0:  # 如果结果是失败的，则把模块名字放到失败模块列表
+                failed_report_module_list.append(module_result[1])
+        failed_report_module_list = list(set(failed_report_module_list))  # 去重
+        if len(failed_report_module_list) == 0:  # 如果没有失败的模块，失败模块日志为固定描述，否则用“，”连接
+            failed_string = "无失败模块"
+        elif len(failed_report_module_list) == 1:
+            failed_string = "".join(failed_report_module_list)
+        else:
+            failed_string = ",".join(failed_report_module_list)
+        # 失败模块列表统计逻辑end
         return [
             ('测试人员', self.tester),
             ('开始时间',startTime),
             ('合计耗时',duration),
-            ('测试结果',status + "，通过率= "+self.passrate),
+            ('测试结果',status + "，通过率 = "+self.passrate),
+            ('失败的模块', failed_string)
         ]
-
 
     def generateReport(self, test, result):
         report_attrs = self.getReportAttributes(result)
@@ -657,14 +706,18 @@ class HTMLTestRunner(Template_mixin):
     def _generate_report(self, result):
         rows = []
         sortedResult = self.sortResult(result.result)
+        # 所有用例统计耗时初始化
+        sum_ns = 0
         for cid, (cls, cls_results) in enumerate(sortedResult):
             # subtotal for a class
-            np = nf = ne = 0
-            for n,t,o,e in cls_results:
+            np = nf = ne = ns = 0
+            for n,t,o,e,s in cls_results:
                 if n == 0: np += 1
                 elif n == 1: nf += 1
-                else: ne += 1
-
+                elif n == 2: ne += 1
+                ns += s  # 把单个class用例文件里面的多个def用例每次的耗时相加
+            ns = round(ns, 2)
+            sum_ns += ns  # 把所有用例的每次耗时相加
             # format class description
             if cls.__module__ == "__main__":
                 name = cls.__name__
@@ -681,28 +734,36 @@ class HTMLTestRunner(Template_mixin):
                 fail = nf,
                 error = ne,
                 cid = 'c%s' % (cid+1),
+                time_usage=str(ns) + "秒"  # 单个用例耗时
             )
             rows.append(row)
 
-            for tid, (n,t,o,e) in enumerate(cls_results):
+            for tid, (n,t,o,e,s) in enumerate(cls_results):
                 self._generate_report_test(rows, cid, tid, n, t, o, e)
-
+        sum_ns = round(sum_ns, 2)
         report = self.REPORT_TMPL % dict(
             test_list = ''.join(rows),
             count = str(result.success_count+result.failure_count+result.error_count),
             Pass = str(result.success_count),
             fail = str(result.failure_count),
             error = str(result.error_count),
+            time_usage=str(sum_ns) + "秒",  # 所有用例耗时
             passrate =self.passrate,
         )
         return report
 
 
     def _generate_report_test(self, rows, cid, tid, n, t, o, e):
-        # e.g. 'pt1.1', 'ft1.1', etc
+        # e.g. 'pt1_1', 'ft1_1', 'et1_1'etc
         has_output = bool(o or e)
         # ID修改点为下划线,支持Bootstrap折叠展开特效 - Findyou
-        tid = (n == 0 and 'p' or 'f') + 't%s_%s' % (cid+1,tid+1)
+        if n == 0:
+            tid_flag = 'p'
+        elif n == 1:
+            tid_flag = 'f'
+        elif n == 2:
+            tid_flag = 'e'
+        tid = tid_flag + 't%s_%s' % (cid+1, tid+1)
         name = t.id().split('.')[-1]
         doc = t.shortDescription() or ""
         desc = doc and ('%s: %s' % (name, doc)) or name
